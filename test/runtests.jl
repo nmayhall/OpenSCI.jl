@@ -2,5 +2,5 @@ using OpenSCI
 using Test
 
 @testset "OpenSCI.jl" begin
-    # Write your tests here.
+    include("tests1.jl")
 end
