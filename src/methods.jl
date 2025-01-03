@@ -44,21 +44,16 @@ function Base.:*(L::Lindbladian{N}, ρ::DyadSum{N,T}) where {N,T}
     # out = DyadSum(N,T=T)
     # rmul!(out, L, ρ)
     dρ = L.H*ρ - ρ*L.H
+    for i in 1:length(L.γ)
+        Li = L.L[i]
+        dρ += L.γ[i] * (Li * (ρ * Li'))
+        LL = Li * Li'
+        dρ -= 0.5*L.γ[i]*(LL*ρ + ρ*LL)
+    end
     return dρ 
 end
 function Base.:*(L::Lindbladian{N}, ρd::Dyad{N}, T=ComplexF64) where N
-    # out = DyadSum(N,T=T)
-    # rmul!(out, L, DyadSum(ρ, T=T))
-    ρ = DyadSum(ρd, T=T)
-    dρ = L.H*ρ - ρ*L.H
-    
-    for i in 1:length(L.γ)
-        Li = L.L[i]
-        dρ += L.γ[i] * (Li * (dρ * Li'))
-        LL = Li * Li'
-        dρ -= 0.5*L.γ[i]*(LL*ρd + ρd*LL)
-    end
-    return dρ 
+    return L*DyadSum(ρd, T=T) 
 end
 
 Base.vec(d::Dyad{N}) where N = 1 + d.ket.v + d.bra.v*(BigInt(2)^N)

@@ -51,4 +51,18 @@ using Printf
 
     @show norm(Matrix(Λ)*vec(Matrix(ρ)))
     
+    #### Now with non-unitary part 
+    Λ = rand(Lindbladian{N}, nH=100, nL=4)
+    display(Λ)
+    @show ρ = DyadSum(Dyad(N,0,0)) 
+
+    err = Matrix(Λ)*vec(Matrix(ρ)) - vec(Matrix(Λ*ρ))
+    @test isapprox(norm(err), 0, atol=1e-14)
+    U,s,V = svd(Matrix(Λ))
+    for i in 1:length(s)
+        @printf(" %4i %12.8f %12.8fi\n", i, real(s[i]), imag(s[i]))
+    end
+    ρss = reshape(V[:,4], (2^N, 2^N))
+    display(ρss)
+    display(tr(ρss))
 end
