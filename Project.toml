@@ -4,11 +4,13 @@ authors = ["Nick Mayhall"]
 version = "1.0.0-DEV"
 
 [deps]
+KrylovKit = "0b1a1467-8014-51b9-945f-bf0ae24f4b77"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 PauliOperators = "be646426-f34c-4536-b1d4-a45a9633e6db"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 
 [compat]
+KrylovKit = "0.8.3"
 LinearAlgebra = "1.11.0"
 Printf = "1.11.0"
 julia = "1.11"

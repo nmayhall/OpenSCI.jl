@@ -2,7 +2,7 @@
 
 julia_version = "1.11.2"
 manifest_format = "2.0"
-project_hash = "a62cd77c2fb2b0aaa251348971fff65db63e409f"
+project_hash = "1c658ecf3bf0902f1075949860900a3ee050b5f1"
 
 [[deps.ANSIColoredPrinters]]
 git-tree-sha1 = "574baf8110975760d391c710b6341da1afa48d8c"
@@ -177,6 +177,18 @@ git-tree-sha1 = "31e996f0a15c7b280ba9f76636b3ff9e2ae58c9a"
 uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 version = "0.21.4"
 
+[[deps.KrylovKit]]
+deps = ["LinearAlgebra", "PackageExtensionCompat", "Printf", "Random", "VectorInterface"]
+git-tree-sha1 = "d7ed24a88732689f26d3f12a817d181d4024bf44"
+uuid = "0b1a1467-8014-51b9-945f-bf0ae24f4b77"
+version = "0.8.3"
+
+    [deps.KrylovKit.extensions]
+    KrylovKitChainRulesCoreExt = "ChainRulesCore"
+
+    [deps.KrylovKit.weakdeps]
+    ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
+
 [[deps.LazilyInitializedFields]]
 git-tree-sha1 = "0f2da712350b020bc3957f269c9caad516383ee0"
 uuid = "0e77f7df-68c5-4e49-93ce-4cd80f5598bf"
@@ -280,6 +292,12 @@ version = "1.7.0"
 deps = ["Artifacts", "Libdl"]
 uuid = "efcefdf7-47ab-520b-bdef-62a2eaa19f15"
 version = "10.42.0+1"
+
+[[deps.PackageExtensionCompat]]
+git-tree-sha1 = "fb28e33b8a95c4cee25ce296c817d89cc2e53518"
+uuid = "65ce6f38-6b18-4e1d-a461-8949797d7930"
+version = "1.0.2"
+weakdeps = ["Requires", "TOML"]
 
 [[deps.Parsers]]
 deps = ["Dates", "PrecompileTools", "UUIDs"]
@@ -418,6 +436,12 @@ version = "1.11.0"
 [[deps.Unicode]]
 uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 version = "1.11.0"
+
+[[deps.VectorInterface]]
+deps = ["LinearAlgebra"]
+git-tree-sha1 = "cea8abaa6e43f72f97a09cf95b80c9eb53ff75cf"
+uuid = "409d34a3-91d5-4945-b6ec-7529ddf182d8"
+version = "0.4.9"
 
 [[deps.Zlib_jll]]
 deps = ["Libdl"]
