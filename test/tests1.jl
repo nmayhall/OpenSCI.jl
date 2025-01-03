@@ -27,5 +27,9 @@ using LinearAlgebra
     
     err = Matrix(Λ)*vec(Matrix(ρ)) - vec(Matrix(Λ*ρ))
     @test isapprox(norm(err), 0, atol=1e-14)
+   
+    err = vec(Matrix(Λ.H)*Matrix(ρ) - Matrix(ρ)*Matrix(Λ.H)) - vec(Matrix(Λ*ρ))
+    @test isapprox(norm(err), 0, atol=1e-14)
+
     
 end
