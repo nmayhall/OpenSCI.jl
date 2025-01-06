@@ -64,13 +64,19 @@ function run()
 
     err = Matrix(Λ)*vec(Matrix(ρ)) - vec(Matrix(Λ*ρ))
     @test isapprox(norm(err), 0, atol=1e-14)
+
+    println("\n Singular Values of Λ")
     U,s,V = svd(Matrix(Λ))
+    
+    println("\n Singular Values of Λ")
     for i in 1:length(s)
         @printf(" %4i %12.8f %12.8fi\n", i, real(s[i]), imag(s[i]))
     end
-    display(V[:,4])
+    # display(V[:,4])
     ρss = real(reshape(V[:,4], (2^N, 2^N)))
     ρss = ρss/tr(ρss)
+    
+    println("\n ρss")
     display(ρss)
     @printf(" tr(ρss) = %12.8f %12.8fi\n", real(tr(ρss)), imag(tr(ρss)))
 
