@@ -3,9 +3,10 @@ using OpenSCI
 using Test
 using LinearAlgebra
 using Printf
+using Random
 
-@testset "tests1.jl" begin
-
+# @testset "tests1.jl" begin
+function run()
     N = 2
 
     @test vec(Dyad(6, 4, 8)) == 517 
@@ -37,22 +38,27 @@ using Printf
         @printf(" %4i %12.8f %12.8fi\n", i, real(s[i]), imag(s[i]))
     end
 
+   
     
+
     Λ = rand(Lindbladian{N}, nH=100, nL=0)
 
     display(Λ)
     F = eigen(Matrix(Λ.H))
     ρ = zeros(2^N, 2^N)
     for i in 1:length(F.values)
-        ρ += randn()*F.vectors * F.vectors'
+        ρ += rand()*F.vectors * F.vectors'
     end
     ρ = ρ/tr(ρ)
     # display(ρ)
 
     @show norm(Matrix(Λ)*vec(Matrix(ρ)))
-    
+   
+    # return 
+
     #### Now with non-unitary part 
-    Λ = rand(Lindbladian{N}, nH=100, nL=4)
+    N = 2
+    Λ = rand(Lindbladian{N}, nH=100, nL=10)
     display(Λ)
     @show ρ = DyadSum(Dyad(N,0,0)) 
 
@@ -62,7 +68,34 @@ using Printf
     for i in 1:length(s)
         @printf(" %4i %12.8f %12.8fi\n", i, real(s[i]), imag(s[i]))
     end
-    ρss = reshape(V[:,4], (2^N, 2^N))
+    display(V[:,4])
+    ρss = real(reshape(V[:,4], (2^N, 2^N)))
+    ρss = ρss/tr(ρss)
     display(ρss)
-    display(tr(ρss))
+    @printf(" tr(ρss) = %12.8f %12.8fi\n", real(tr(ρss)), imag(tr(ρss)))
+
+    Random.seed!(2)
+    tmp = Matrix{Float64}(I, 2^N, 2^N)
+    
+    F = svd(rand(2^N, 2^N))
+    tmp = F.U * Diagonal(F.S) * F.U'
+
+    tmp /= tr(tmp) 
+    println(" positive? ", eigvals(tmp))
+    println("\n Trace of ρ")
+    display(tr(tmp))
+    display(tmp)
+    tmp = Matrix(Λ)*vec(tmp)
+    tmp = reshape(tmp, (2^N, 2^N))
+    println("\n Trace of Λρ")
+    display(tr(tmp))
+    display(tmp)
+
+    println("\n  Do my jump operators sum to I?")
+    tmp = PauliSum(N) 
+    for Li in Λ.L
+        tmp += Li*Li'
+    end
+    display(tmp)
 end
+run()

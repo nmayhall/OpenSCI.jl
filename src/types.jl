@@ -46,11 +46,14 @@ function Base.rand(T::Type{Lindbladian{N}}; nH=2, nL=2) where N
         sum!(Λ.H,opi)
     end
     for i in 1:nL
-        opi = rand(ScaledPauli{N})
-        for j in 1:nL
-            opi += rand(ScaledPauli{N})
-        end
-        push!(Λ.L,opi)
+        opi = rand(Pauli{N})
+        # for j in 1:nL
+        #     opj = rand(ScaledPauli{N})
+        #     # is_diagonal(opj) == false || continue
+        #     opi += opj  
+        # end
+        # opi = opi + opi'
+        push!(Λ.L,PauliSum(opi))
         push!(Λ.γ,rand())
     end
     return Λ
