@@ -117,37 +117,51 @@ end
 
 function run3()
     N = 3
+    dim = 2^N
     Λ = rand(Lindbladian{N}, nH=100, nL=10)
     display(Λ)
+    
+    println("\n EigenValues of Λ")
+    L_evals = eigvals(Matrix(Λ))
+    for i in 1:length(L_evals) 
+        @printf(" %4i %12.8f %12.8fi\n", i, real(L_evals[i]), imag(L_evals[i]))
+    end
     
     U,s,V = svd(Matrix(Λ))
     println("\n Singular Values of Λ")
     for i in 1:length(s)
         @printf(" %4i %12.8f %12.8fi\n", i, real(s[i]), imag(s[i]))
     end
+    V = V ./ sqrt(2^N)
     println("\n ρss: ")
-    display(real(reshape(V[:,end], (2^N, 2^N))))
+    ρss = reshape(V[:,end], (2^N, 2^N))
+    display(real(ρss))
 
     println("\n ρss-1: ")
     display(real(reshape(V[:,end-1], (2^N, 2^N))))
 
-    @show ρ = DyadSum(Dyad(N,0,0))
+    @show ρ = DyadSum(Dyad(N,1,1))
+
 
     Lmat = Matrix(Λ)*(1+0.0im)
     ρmat = vec(Matrix(ρ))*(1+0.0im)
     
     f(du, u, p, t) = du .= Lmat*u
-    tspan = (0.0, 1.0)
+    tspan = (0.0, 2.0)
     prob = ODEProblem(f, ρmat, tspan) 
     # f(u, p, t) = Λ*u 
     # tspan = (0.0, 1.0)
     # prob = ODEProblem(f, ρ, tspan) 
     
-    sol = solve(prob, reltol = 1e-8, abstol = 1e-8, saveat = 0.001)
+    sol = solve(prob, reltol = 1e-8, abstol = 1e-8, saveat = 0.01)
 
     gs_prob = [abs(i[1]*i[1]') for i in sol.u]
     t = [i for i in sol.t]
     plot(t, gs_prob, label = "gs_prob")
+    for ei in L_evals[1:5] 
+        println(" ei = ", ei)
+        plot!(t, [abs(exp(ei*ti)) for ti in t], linestyle = :dash, label = "exp(ei*ti)", legend=false)
+    end
     savefig("./plot.pdf")
     
     ρT = reshape(sol.u[end], (2^N, 2^N))
@@ -157,6 +171,9 @@ function run3()
     display(eigvals(ρT))
     println("\n tr(ρT)")
     display(tr(ρT))
+
+    println("\n tr(ρss*ρT)")
+    display(tr(ρss*ρT)*dim)
 end
 
 run1()
