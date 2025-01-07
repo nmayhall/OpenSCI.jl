@@ -140,7 +140,7 @@ function run3()
     println("\n ρss-1: ")
     display(real(reshape(V[:,end-1], (2^N, 2^N))))
 
-    @show ρ = DyadSum(Dyad(N,1,1))
+    @show ρ = DyadSum(Dyad(N,0,0))
 
 
     Lmat = Matrix(Λ)*(1+0.0im)

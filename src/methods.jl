@@ -73,3 +73,4 @@ function Base.Matrix(L::Lindbladian{N}) where N
     end
     return Lmat
 end
+
