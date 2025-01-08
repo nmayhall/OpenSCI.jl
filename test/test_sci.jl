@@ -9,9 +9,10 @@ using DifferentialEquations
 
 # @testset "tests1.jl" begin
 function test1()
-    N = 4
+    N = 2
     L = rand(Lindbladian{N}, nH=10, nL=5)
-    
+    Random.seed!(1234)
+
     v0 = SparseDyadVectors(DyadSum(Dyad(N,0,0)))
 
     display(L)
@@ -31,14 +32,20 @@ function test1()
     err = Matrix(L)*todense(v0) - todense(L*v0)
     @test isapprox(norm(err), 0, atol=1e-14)
 
-    selected_ci(L, v0, max_iter_outer=5)
+    # selected_ci(L, v0, max_iter_outer=5)
 
-    # σ = multiply(L, v0)
-    # Lmat = build_subspace_L(L, σ)
+    v0 = multiply(L, v0)
+    v0 = multiply(L, v0)
+    v0 = multiply(L, v0)
+    Lmat = build_subspace_L(L, v0)
+    _,s,V = svd(Lmat)
+    @printf("\n Singular values of Lmat:\n")
+    for i in 1:length(s)
+        @printf(" %4i % 12.8f\n", i, s[i])
+    end
   
     Lmat = Matrix(L)
     _,s,V = svd(Lmat)
-
     @printf("\n Singular values of Lmat:\n")
     for i in 1:length(s)
         @printf(" %4i % 12.8f\n", i, s[i])

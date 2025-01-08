@@ -85,7 +85,7 @@ function build_subspace_L(L::Lindbladian{N}, v::SparseDyadVectors{N,T}) where {N
     vi = 0
     # Unitary part
     for rdyad in keys(v)
-        vi += 1
+        vi = indices[rdyad] 
 
         for (pauli, coeff) in L.H.ops
             
@@ -102,22 +102,25 @@ function build_subspace_L(L::Lindbladian{N}, v::SparseDyadVectors{N,T}) where {N
 
         
         for i in 1:length(L.γ)
-
+            γ = L.γ[i]
             for (pj, cj) in L.L[i].ops
                 for (pk, ck) in L.L[i].ops
-                    ldyad = L.γ[i] * pj * rdyad * Pauli(pk)'
+                    Pj = pj * cj
+                    Pk = pk * ck
+
+                    ldyad = γ * (Pj * rdyad * Pk')
                     if haskey(v, ldyad.dyad) 
                         Lmat[indices[ldyad.dyad], vi] += ldyad.coeff
                     end
                     
-                    ldyad = L.γ[i] * pj * Pauli(pk)' * rdyad
+                    ldyad = γ * (rdyad * Pj' * Pk)
                     if haskey(v, ldyad.dyad) 
-                        Lmat[indices[ldyad.dyad], vi] += -.5 * ldyad.coeff
+                        Lmat[indices[ldyad.dyad], vi] -= .5 * ldyad.coeff
                     end
                     
-                    ldyad = L.γ[i] * rdyad * pj * Pauli(pk)'
+                    ldyad = γ * (Pj' * Pk * rdyad)
                     if haskey(v, ldyad.dyad) 
-                        Lmat[indices[ldyad.dyad], vi] += -.5 * ldyad.coeff
+                        Lmat[indices[ldyad.dyad], vi] -= .5 * ldyad.coeff
                     end
                 end
             end
