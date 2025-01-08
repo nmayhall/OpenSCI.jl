@@ -52,9 +52,9 @@ function multiply(L::Lindbladian{N}, ρ::SparseDyadVectors{N,T}; ϵ=1e-16) where
         
         for i in 1:length(L.γ)
             Li = L.L[i]
-            LL = Li * Li'
+            LL = Li' * Li
            
-            σi +=  L.γ[i] * (Li * (rdyad * Li'))
+            σi +=  L.γ[i] * (Li * rdyad * Li')
             σi -= 0.5*L.γ[i]*(LL*rdyad + rdyad*LL)
         end
         
