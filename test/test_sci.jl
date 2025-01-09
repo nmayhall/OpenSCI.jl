@@ -12,11 +12,11 @@ using Arpack
 # @testset "tests1.jl" begin
 function test1()
     Random.seed!(1234)
-    N = 2
+    N = 1
 
     L = Lindbladian(N)
     add_hamiltonian!(L, OpenSCI.heisenberg_1D(N, 1.1, 1.2, 1.3))
-    # add_channel_dephasing!(L, .1)
+    add_channel_dephasing!(L, .1)
     add_channel_depolarizing!(L, .1)
     # add_channel_amplitude_damping!(L, .1)
     display(L)

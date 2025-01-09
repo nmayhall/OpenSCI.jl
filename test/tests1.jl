@@ -118,7 +118,12 @@ end
 function run3()
     N = 3
     dim = 2^N
-    Λ = rand(Lindbladian{N}, nH=100, nL=10)
+    # Λ = rand(Lindbladian{N}, nH=100, nL=10)
+    Λ = Lindbladian(N)
+    add_hamiltonian!(Λ, OpenSCI.heisenberg_1D(N, 10.1, 20.2, 2.3))
+    add_channel_dephasing!(Λ, .1)
+    add_channel_depolarizing!(Λ, .1)
+    # add_channel_amplitude_damping!(Λ, 1.)
     display(Λ)
     
     println("\n EigenValues of Λ")
@@ -145,9 +150,18 @@ function run3()
 
     Lmat = Matrix(Λ)*(1+0.0im)
     ρmat = vec(Matrix(ρ))*(1+0.0im)
-    
+   
+    F = eigen(Lmat)
+    println("\n Eigenvalues of Λ")
+    for i in 1:length(s)
+        @printf(" %4i %12.8f %12.8fi\n", i, real(F.values[i]), imag(F.values[i]))
+    end
+    println(" Trace of ρss: ", tr(reshape(F.vectors[:,end], (2^N, 2^N)))/sqrt(2^N))
+    println("")
+
+
     f(du, u, p, t) = du .= Lmat*u
-    tspan = (0.0, 2.0)
+    tspan = (0.0, 1.0)
     prob = ODEProblem(f, ρmat, tspan) 
     # f(u, p, t) = Λ*u 
     # tspan = (0.0, 1.0)
@@ -162,6 +176,11 @@ function run3()
         println(" ei = ", ei)
         plot!(t, [abs(exp(ei*ti)) for ti in t], linestyle = :dash, label = "exp(ei*ti)", legend=false)
     end
+
+    for i in 1:length(sol.t)
+        ρt = reshape(sol.u[i], (2^N, 2^N))
+        @printf(" tr(ρt) = %12.8f %12.8fi\n", real(tr(ρt)), imag(tr(ρt)))
+    end
     savefig("./plot.pdf")
     
     ρT = reshape(sol.u[end], (2^N, 2^N))
@@ -173,7 +192,7 @@ function run3()
     display(tr(ρT))
 
     println("\n tr(ρss*ρT)")
-    display(tr(ρss*ρT)*dim)
+    display(tr(ρss*ρT))
 end
 
 run1()
