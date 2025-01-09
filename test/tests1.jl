@@ -115,50 +115,88 @@ function run2()
     display(ρ + -1im*(Matrix(Λ.H)*ρ - ρ*Matrix(Λ.H)))
 end
 
-function run3()
-    N = 3
+function heisenberg_test()
+    N = 1
     dim = 2^N
-    # Λ = rand(Lindbladian{N}, nH=100, nL=10)
     Λ = Lindbladian(N)
-    add_hamiltonian!(Λ, OpenSCI.heisenberg_1D(N, 10.1, 20.2, 2.3))
+    add_hamiltonian!(Λ, OpenSCI.heisenberg_1D(N, 1.1, 1.2, 1.3))
     add_channel_dephasing!(Λ, .1)
-    add_channel_depolarizing!(Λ, .1)
-    # add_channel_amplitude_damping!(Λ, 1.)
+    add_channel_depolarizing!(Λ, .2)
+    add_channel_amplitude_damping!(Λ, .3)
+
+    println(" Here is our Lindbladian:")
     display(Λ)
-    
-    println("\n EigenValues of Λ")
-    L_evals = eigvals(Matrix(Λ))
-    for i in 1:length(L_evals) 
-        @printf(" %4i %12.8f %12.8fi\n", i, real(L_evals[i]), imag(L_evals[i]))
-    end
-    
-    U,s,V = svd(Matrix(Λ))
-    println("\n Singular Values of Λ")
-    for i in 1:length(s)
-        @printf(" %4i %12.8f %12.8fi\n", i, real(s[i]), imag(s[i]))
-    end
-    V = V ./ sqrt(2^N)
-    println("\n ρss: ")
-    ρss = reshape(V[:,end], (2^N, 2^N))
-    display(real(ρss))
-
-    println("\n ρss-1: ")
-    display(real(reshape(V[:,end-1], (2^N, 2^N))))
-
-    @show ρ = DyadSum(Dyad(N,0,0))
-
+   
 
     Lmat = Matrix(Λ)*(1+0.0im)
-    ρmat = vec(Matrix(ρ))*(1+0.0im)
    
     F = eigen(Lmat)
-    println("\n Eigenvalues of Λ")
-    for i in 1:length(s)
-        @printf(" %4i %12.8f %12.8fi\n", i, real(F.values[i]), imag(F.values[i]))
-    end
-    println(" Trace of ρss: ", tr(reshape(F.vectors[:,end], (2^N, 2^N)))/sqrt(2^N))
-    println("")
 
+    # Sort Eigenvalues by real part
+    perm = sortperm(F.values, by=real)
+    F.values .= F.values[perm]
+    F.vectors .= F.vectors[:, perm]
+
+    V = F.vectors
+    W = inv(F.vectors)
+    λ = F.values
+    # Make sure the diagonalization worked
+    @test norm(Lmat - V*Diagonal(λ)*W) < 1e-12
+
+    println("\n Eigenvalues of Λ")
+    for i in 1:length(λ)
+        vi = reshape(V[:,i], (dim, dim))
+        wi = reshape(W[:,i], (dim, dim))
+        t = tr(vi)
+        @printf(" %4i %12.8f %12.8fi Tr %12.8f %12.8fi\n", i, real(F.values[i]), imag(F.values[i]), real(t), imag(t))
+    end
+
+    
+    ρ0 = DyadSum(Dyad(N,0,0))
+    ρ0vec = vec(Matrix(ρ0))*(1+0.0im)
+    println(" Initial State: ")
+    display(ρ0)
+
+    # This function will return the time dependent density Matrix
+    function compute_ρt(t, F, ρ0::Vector)
+        
+        w = inv(F.vectors)
+        v = F.vectors
+        λ = F.values
+
+        return v * Diagonal(exp.(λ*t)) * w * ρ0
+
+      
+        # n_decay_modes = length(F.values)-1
+        # # Initialize to the steady state
+        # ρt = deepcopy(reshape(F.vectors[:,end], (dim, dim))) 
+        # ρt = ρt / tr(ρt)
+        
+        # # Add decay modes
+        # for i in 1:n_decay_modes
+        #     real(λ[i]) < 0 || throw(ArgumentError("Eigenvalues must have negative real part"))
+        #     vi = reshape(v[:,i], (dim, dim)) 
+        #     wi = reshape(w[:,i], (dim, dim)) 
+        #     ρt += exp(λ[i]*t) * tr(wi*ρ0) * vi # In the basis of the Lindbladian
+        # end
+        
+        # # convert into original basis
+        # ρt = reshape(v, (dim, dim)) * ρt * reshape(w, (dim, dim))
+        # return ρt
+    end
+    
+    T = 1.0
+    for i in [0.0, 0.1, 0.2, 0.5, 1.0] 
+        ρt = compute_ρt(i, F, vec(Matrix(ρ0)))
+        ρt = reshape(ρt, (dim, dim))
+        evals = eigvals(ρt)
+        # @show [real(i) for i in evals]        
+        @test all([real(i) > -1e-14 && real(i) < 1+1e-14  for i in evals])
+        @test all([abs(imag(i)) < 1e-14 for i in evals])
+        # println(" tr(ρt) = ", tr(ρt))
+    end
+
+    return
 
     f(du, u, p, t) = du .= Lmat*u
     tspan = (0.0, 1.0)
@@ -195,6 +233,6 @@ function run3()
     display(tr(ρss*ρT))
 end
 
-run1()
-run2()
-run3()
+# run1()
+# run2()
+heisenberg_test()
