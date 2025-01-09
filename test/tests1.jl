@@ -119,7 +119,7 @@ function heisenberg_test()
     N = 1
     dim = 2^N
     Λ = Lindbladian(N)
-    add_hamiltonian!(Λ, OpenSCI.heisenberg_1D(N, 1.1, 1.2, 1.3))
+    add_hamiltonian!(Λ, OpenSCI.heisenberg_1D(N, 1.0, 1.0, 0.0))
     add_channel_dephasing!(Λ, .1)
     add_channel_depolarizing!(Λ, .2)
     add_channel_amplitude_damping!(Λ, .3)
@@ -185,7 +185,7 @@ function heisenberg_test()
         # return ρt
     end
     
-    T = 1.0
+    T = 10.0
     for i in [0.0, 0.1, 0.2, 0.5, 1.0] 
         ρt = compute_ρt(i, F, vec(Matrix(ρ0)))
         ρt = reshape(ρt, (dim, dim))
@@ -196,16 +196,47 @@ function heisenberg_test()
         # println(" tr(ρt) = ", tr(ρt))
     end
 
-    return
 
     f(du, u, p, t) = du .= Lmat*u
-    tspan = (0.0, 1.0)
-    prob = ODEProblem(f, ρmat, tspan) 
-    # f(u, p, t) = Λ*u 
-    # tspan = (0.0, 1.0)
-    # prob = ODEProblem(f, ρ, tspan) 
-    
+    tspan = (0.0, T)
+    prob = ODEProblem(f, vec(Matrix(ρ0)), tspan) 
     sol = solve(prob, reltol = 1e-8, abstol = 1e-8, saveat = 0.01)
+
+
+    populations_ode = Dict{Dyad{N}, Vector{Float64}}([])
+    populations_eig = Dict{Dyad{N}, Vector{Float64}}([])
+    for i in 0:2^N-1
+        ii = Dyad(N,i,i)
+        ii_idx = vec(ii)
+        populations_ode[ii] = [abs(v[ii_idx]) for v in sol.u]
+        populations_eig[ii] = []
+    end
+    for ti in 1:length(sol.t)
+        t = sol.t[ti]
+        ρt = compute_ρt(t, F, vec(Matrix(ρ0)))
+        for i in 0:2^N-1
+            ii = Dyad(N,i,i)
+            ii_idx = vec(ii)
+            push!(populations_eig[ii], abs(ρt[ii_idx]))
+        end
+    end
+   
+    t = [i for i in sol.t]
+    plot()
+    for (state, pops) in populations_ode
+        plot!(t, pops, label = string(state))
+    end
+    for (state, pops) in populations_eig
+        plot!(t, pops, label = string(state), linestyle=:dash)
+    end
+    savefig("./plot.pdf")
+    
+    return
+    
+    t = [i for i in sol.t]
+    plot(t, gs_prob, label = "gs_prob")
+    return
+
 
     gs_prob = [abs(i[1]*i[1]') for i in sol.u]
     t = [i for i in sol.t]
