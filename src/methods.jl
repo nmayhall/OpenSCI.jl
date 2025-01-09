@@ -57,7 +57,7 @@ function add_channel_amplitude_damping!(L::Lindbladian{N}, γ::Vector{<:Real}) w
     length(γ) == N || throw(ArgumentError("Length of γ must be equal to N"))
     for i in 1:N
         pi = PauliSum(N)
-        pi += 1/sqrt(2)*(Pauli(N, X=[i]) + -1im * Pauli(N, Y=[i]))
+        pi += 1/sqrt(2)*(Pauli(N, X=[i]) + 1im * Pauli(N, Y=[i]))
         push!(L.L, pi)
         push!(L.γ, γ[i])
     end

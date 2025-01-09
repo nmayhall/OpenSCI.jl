@@ -12,13 +12,13 @@ using Arpack
 # @testset "tests1.jl" begin
 function test1()
     Random.seed!(1234)
-    N = 1
+    N = 2
 
     L = Lindbladian(N)
     add_hamiltonian!(L, OpenSCI.heisenberg_1D(N, 1.1, 1.2, 1.3))
     # add_channel_dephasing!(L, .1)
-    # add_channel_depolarizing!(L, .1)
-    add_channel_amplitude_damping!(L, .1)
+    add_channel_depolarizing!(L, .1)
+    # add_channel_amplitude_damping!(L, .1)
     display(L)
 
     # Lmat = Matrix(L)
@@ -34,7 +34,10 @@ function test1()
 
     vals, vecs = eigen(Matrix(L))
 
+    println(" v'v: ")
+    display(vecs[:,end]'*vecs[:,end])
     states = [reshape(vecs[:,i], 2^N, 2^N)/sqrt(2^N) for i in 1:length(vals)]
+    # states = [reshape(vecs[:,i], 2^N, 2^N) for i in 1:length(vals)]
 
     for i in states
         display(i)
@@ -44,7 +47,8 @@ function test1()
     for i in 1:length(vals)
         @printf(" %4i %12.8f %12.8fi Tr = %12.8f\n", i, real(vals[i]), imag(vals[i]), real(tr(states[i])))
     end
-    
+   
+    return
     
     v0 = DyadSum(Dyad(N,0,0))
    
