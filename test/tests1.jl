@@ -206,9 +206,10 @@ function heisenberg_test()
     end
    
     t = [i for i in sol.t]
-    plot()
+    plt = plot()
     for ei in λ 
-        plot!(t, [abs(exp(ei*ti)) for ti in t], linestyle = :dash, c=:gray)
+        push!(t, [abs(exp(ei*ti)) for ti in t], linestyle = :dash, c=:gray)
+        # plot!(t, [abs(exp(ei*ti)) for ti in t], linestyle = :dash, c=:gray)
     end
     for (state, pops) in populations_ode
         plot!(t, pops, label = string(state.bra.v+1), c = palette(:tab10)[state.bra.v+1])
