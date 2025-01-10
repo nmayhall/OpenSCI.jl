@@ -116,14 +116,14 @@ function run2()
 end
 
 function heisenberg_test()
-    N = 1
+    N = 2
     dim = 2^N
     Λ = Lindbladian(N)
-    add_hamiltonian!(Λ, OpenSCI.heisenberg_1D(N, 1.0, 1.0, 0.0))
+    add_hamiltonian!(Λ, OpenSCI.heisenberg_1D(N, 3.0, 2.0, 1.0))
     add_channel_dephasing!(Λ, .1)
     add_channel_depolarizing!(Λ, .2)
     add_channel_amplitude_damping!(Λ, .3)
-
+    Λ = rand(Lindbladian{N}, nH=10, nL=4)
     println(" Here is our Lindbladian:")
     display(Λ)
    
@@ -146,7 +146,7 @@ function heisenberg_test()
     println("\n Eigenvalues of Λ")
     for i in 1:length(λ)
         vi = reshape(V[:,i], (dim, dim))
-        wi = reshape(W[:,i], (dim, dim))
+        # wi = reshape(W[:,i], (dim, dim))
         t = tr(vi)
         @printf(" %4i %12.8f %12.8fi Tr %12.8f %12.8fi\n", i, real(F.values[i]), imag(F.values[i]), real(t), imag(t))
     end
@@ -165,27 +165,9 @@ function heisenberg_test()
         λ = F.values
 
         return v * Diagonal(exp.(λ*t)) * w * ρ0
-
-      
-        # n_decay_modes = length(F.values)-1
-        # # Initialize to the steady state
-        # ρt = deepcopy(reshape(F.vectors[:,end], (dim, dim))) 
-        # ρt = ρt / tr(ρt)
-        
-        # # Add decay modes
-        # for i in 1:n_decay_modes
-        #     real(λ[i]) < 0 || throw(ArgumentError("Eigenvalues must have negative real part"))
-        #     vi = reshape(v[:,i], (dim, dim)) 
-        #     wi = reshape(w[:,i], (dim, dim)) 
-        #     ρt += exp(λ[i]*t) * tr(wi*ρ0) * vi # In the basis of the Lindbladian
-        # end
-        
-        # # convert into original basis
-        # ρt = reshape(v, (dim, dim)) * ρt * reshape(w, (dim, dim))
-        # return ρt
     end
     
-    T = 10.0
+    T = 5
     for i in [0.0, 0.1, 0.2, 0.5, 1.0] 
         ρt = compute_ρt(i, F, vec(Matrix(ρ0)))
         ρt = reshape(ρt, (dim, dim))
@@ -214,6 +196,8 @@ function heisenberg_test()
     for ti in 1:length(sol.t)
         t = sol.t[ti]
         ρt = compute_ρt(t, F, vec(Matrix(ρ0)))
+        ρode = sol.u[ti]
+        @test norm(ρt - ρode) < 1e-6
         for i in 0:2^N-1
             ii = Dyad(N,i,i)
             ii_idx = vec(ii)
@@ -223,11 +207,14 @@ function heisenberg_test()
    
     t = [i for i in sol.t]
     plot()
+    for ei in λ 
+        plot!(t, [abs(exp(ei*ti)) for ti in t], linestyle = :dash, c=:gray)
+    end
     for (state, pops) in populations_ode
-        plot!(t, pops, label = string(state))
+        plot!(t, pops, label = string(state.bra.v+1), c = palette(:tab10)[state.bra.v+1])
     end
     for (state, pops) in populations_eig
-        plot!(t, pops, label = string(state), linestyle=:dash)
+        plot!(t, pops, label = string(state.bra.v+1), linestyle=:dash, c = palette(:tab10)[state.bra.v+1])
     end
     savefig("./plot.pdf")
     
