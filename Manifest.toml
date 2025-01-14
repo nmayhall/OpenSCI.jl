@@ -2,7 +2,7 @@
 
 julia_version = "1.11.2"
 manifest_format = "2.0"
-project_hash = "52a2d990a5d3199c050126a0bc1a7e4e4be45cab"
+project_hash = "b1dc8da29e9504b7ff46b792254eae30b7e93166"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "72af59f5b8f09faee36b4ec48e014a79210f2f4f"
@@ -149,10 +149,10 @@ uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 version = "1.11.0"
 
 [[deps.BenchmarkTools]]
-deps = ["JSON", "Logging", "Printf", "Profile", "Statistics", "UUIDs"]
-git-tree-sha1 = "f1dff6729bc61f4d49e140da1af55dcd1ac97b2f"
+deps = ["Compat", "JSON", "Logging", "Printf", "Profile", "Statistics", "UUIDs"]
+git-tree-sha1 = "e38fbc49a620f5d0b660d7f543db1009fe0f8336"
 uuid = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
-version = "1.5.0"
+version = "1.6.0"
 
 [[deps.BitFlags]]
 git-tree-sha1 = "0691e34b3bb8be9307330f88d1a3c3f25466c24d"
@@ -1703,7 +1703,9 @@ version = "2.8.1"
 
 [[deps.PauliOperators]]
 deps = ["BenchmarkTools", "Documenter", "InteractiveUtils", "LinearAlgebra", "Printf", "Random", "StatProfilerHTML"]
-path = "../PauliOperators"
+git-tree-sha1 = "2cf83c30db8152e133721b1865850da68315f392"
+repo-rev = "spinboson"
+repo-url = "git@github.com:nmayhall-vt/PauliOperators.jl.git"
 uuid = "be646426-f34c-4536-b1d4-a45a9633e6db"
 version = "1.0.0-DEV"
 
