@@ -1703,7 +1703,7 @@ version = "2.8.1"
 
 [[deps.PauliOperators]]
 deps = ["BenchmarkTools", "Documenter", "InteractiveUtils", "LinearAlgebra", "Printf", "Random", "StatProfilerHTML"]
-git-tree-sha1 = "2cf83c30db8152e133721b1865850da68315f392"
+git-tree-sha1 = "50fd0ad94e5fbce0f14cff7c74756ca8a3b42e77"
 repo-rev = "spinboson"
 repo-url = "https://github.com/nmayhall-vt/PauliOperators.jl"
 uuid = "be646426-f34c-4536-b1d4-a45a9633e6db"
