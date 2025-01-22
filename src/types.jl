@@ -5,6 +5,8 @@ using OrderedCollections
 # using Dictionaries
 # using StaticArrays
 
+abstract type SuperOperator{N} end
+
 SparseDyadVectors{N,T} = OrderedDict{Dyad{N}, Vector{T}} 
 function SparseDyadVectors(ds::DyadSum{N,T}) where {N,T}
     sdv = OrderedDict{Dyad{N}, Vector{T}}()
@@ -28,7 +30,7 @@ This is general enough to realize infinitesmal evolution of any CPT map.
 `L`: Is a vector of Jump operators
 `γ`: Is the vector of Jump operator coefficients (diagonal form assumed)
 """
-struct Lindbladian{N}
+struct Lindbladian{N} <: SuperOperator{N}
     H::PauliSum{N}          
     L::Vector{PauliSum{N}}
     γ::Vector{Float64}
