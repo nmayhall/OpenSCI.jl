@@ -29,6 +29,13 @@ using Plots
     println(" Test Lindbladian adjoint times PauliSum")
     err = Matrix(L)'*vec(Matrix(o)) - vec(Matrix(L'*o))
     @test norm(err) < 1e-14
+
+    println(" Test picture invariance")
+    ρ = rand(PauliSum{N})
+    o = rand(PauliSum{N})
+    ev_s = tr( o * (L*ρ))
+    ev_h = tr((L'*o) * ρ)
+    @test norm(ev_s - ev_h) < 1e-12
     return 
 end
 
