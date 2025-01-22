@@ -119,11 +119,11 @@ function heisenberg_test()
     N = 2
     dim = 2^N
     Λ = Lindbladian(N)
-    add_hamiltonian!(Λ, OpenSCI.heisenberg_1D(N, 3.0, 2.0, 1.0))
-    add_channel_dephasing!(Λ, .1)
-    add_channel_depolarizing!(Λ, .2)
-    add_channel_amplitude_damping!(Λ, .3)
-    Λ = rand(Lindbladian{N}, nH=10, nL=4)
+    add_hamiltonian!(Λ, OpenSCI.heisenberg_1D(N, 1.0, 1.0, 1.0))
+    # add_channel_dephasing!(Λ, .2)
+    add_channel_depolarizing!(Λ, .6)
+    add_channel_amplitude_damping!(Λ, .5)
+    # Λ = rand(Lindbladian{N}, nH=10, nL=4)
     println(" Here is our Lindbladian:")
     display(Λ)
    
@@ -167,7 +167,7 @@ function heisenberg_test()
         return v * Diagonal(exp.(λ*t)) * w * ρ0
     end
     
-    T = 5
+    T = 10 
     for i in [0.0, 0.1, 0.2, 0.5, 1.0] 
         ρt = compute_ρt(i, F, vec(Matrix(ρ0)))
         ρt = reshape(ρt, (dim, dim))

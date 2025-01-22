@@ -29,14 +29,14 @@ function selected_ci(L::Lindbladian{N}, v::SparseDyadVectors{N,T};
 
         Lmat = build_subspace_L(L, Pv)
 
-        _,s,V = svd(Lmat)
+        F = eigen(Lmat)
 
-        @printf("\n Singular values of Lmat:\n")
-        for i in 1:length(s)
-            @printf(" %4i % 12.8f\n", i, s[i])
+        @printf("\n Eigenvalues of Lmat:\n")
+        for i in 1:length(F.values)
+            @printf(" %4i % 12.8f % 12.8fi\n", i, real(F.values[i]), imag(F.values[i]))
         end
 
-        fill!(Pv, V[:,end-R+1:end])
+        fill!(Pv, F.vectors[:,end-R+1:end])
     end
 
 end
