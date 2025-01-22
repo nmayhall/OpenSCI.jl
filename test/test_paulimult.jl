@@ -36,6 +36,20 @@ using Plots
     ev_s = tr( o * (L*ρ))
     ev_h = tr((L'*o) * ρ)
     @test norm(ev_s - ev_h) < 1e-12
+
+    println(" Test SubspaceDissipator")
+    N = 4
+    subspace = rand(PauliSum{N})
+    D = SubspaceDissipator{N}(subspace, .1)
+    display(D)
+    display(subspace)
+    display(collect(keys(subspace))[1])
+    o = Pauli(collect(keys(subspace))[1])
+    subspace += rand(PauliSum{N})
+    display(o)
+    display(subspace)
+    println()
+    display(D*subspace)
     return 
 end
 

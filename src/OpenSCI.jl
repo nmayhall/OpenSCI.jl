@@ -10,6 +10,7 @@ include("sci.jl")
 include("Hamiltonians.jl")
 
 export Lindbladian
+export SubspaceDissipator 
 export SparseDyadVectors
 export todense
 export selected_ci

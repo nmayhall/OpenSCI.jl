@@ -30,7 +30,6 @@ end
 #     return L*PauliSum(p) 
 # end
 
-Base.vec(d::Dyad{N}) where N = 1 + d.ket.v + d.bra.v*(BigInt(2)^N)
 
 function Base.Matrix(L::Lindbladian{N}) where N
     Lmat = zeros(ComplexF64, 4^N, 4^N)
@@ -40,7 +39,7 @@ function Base.Matrix(L::Lindbladian{N}) where N
             
             σ = L * dyad_r        
             for (dyad_l, coeff) in σ
-                Lmat[vec(dyad_l), vec(dyad_r)] = coeff
+                Lmat[index(dyad_l), index(dyad_r)] = coeff
             end
         end
     end

@@ -11,7 +11,7 @@ using DifferentialEquations
 function run1()
     N = 2
 
-    @test vec(Dyad(6, 4, 8)) == 517 
+    @test index(Dyad(6, 4, 8)) == 517 
     Λ = rand(Lindbladian{N}, nH=100, nL=0)
     display(Λ)
 
@@ -26,7 +26,7 @@ function run1()
     σ = Λ*ρ
 
     # test this with Matrix
-    ρv = vec(Matrix(ρ))
+    ρv = Vector(ρ)
     Lv = Matrix(Λ)
     
     err = Matrix(Λ)*vec(Matrix(ρ)) - vec(Matrix(Λ*ρ))
@@ -189,7 +189,7 @@ function heisenberg_test()
     populations_eig = Dict{Dyad{N}, Vector{Float64}}([])
     for i in 0:2^N-1
         ii = Dyad(N,i,i)
-        ii_idx = vec(ii)
+        ii_idx = index(ii)
         populations_ode[ii] = [abs(v[ii_idx]) for v in sol.u]
         populations_eig[ii] = []
     end
@@ -200,7 +200,7 @@ function heisenberg_test()
         @test norm(ρt - ρode) < 1e-6
         for i in 0:2^N-1
             ii = Dyad(N,i,i)
-            ii_idx = vec(ii)
+            ii_idx = index(ii)
             push!(populations_eig[ii], abs(ρt[ii_idx]))
         end
     end
