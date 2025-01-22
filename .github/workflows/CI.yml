@@ -62,7 +62,7 @@ jobs:
         shell: julia --project=docs --color=yes {0}
         run: |
           using Pkg
-          Pkg.add("https://github.com/nmayhall-vt/PauliOperators.jl#spinboson")
+          Pkg.add(url="https://github.com/nmayhall-vt/PauliOperators.jl#spinboson")
           Pkg.develop(PackageSpec(path=pwd()))
           Pkg.instantiate()
       - uses: julia-actions/julia-buildpkg@v1
