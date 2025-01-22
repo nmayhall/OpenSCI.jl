@@ -2,9 +2,18 @@ using PauliOperators
 using OpenSCI
 
 
-function Base.:*(L::Lindbladian{N}, ρ::DyadSum{N,T}) where {N,T}
-    # out = DyadSum(N,T=T)
-    # rmul!(out, L, ρ)
+function Base.:*(Lprime::Adjoint{<:Any, Lindbladian{N}}, A) where {N}
+    L = Lprime.parent
+    dA = 1im * (L.H*A - A*L.H)
+    for i in 1:length(L.γ)
+        Li = L.L[i]
+        dA += L.γ[i] * (Li' * A * Li)
+        LL = Li' * Li
+        dA -= 0.5*L.γ[i]*(LL * A + A * LL)
+    end
+    return dA 
+end
+function Base.:*(L::Lindbladian{N}, ρ) where {N}
     dρ = -1im * (L.H*ρ - ρ*L.H)
     for i in 1:length(L.γ)
         Li = L.L[i]
@@ -14,9 +23,12 @@ function Base.:*(L::Lindbladian{N}, ρ::DyadSum{N,T}) where {N,T}
     end
     return dρ 
 end
-function Base.:*(L::Lindbladian{N}, ρd::Dyad{N}, T=ComplexF64) where N
-    return L*DyadSum(ρd, T=T) 
-end
+# function Base.:*(L::Lindbladian{N}, ρd::Dyad{N}, T=ComplexF64) where N
+#     return L*DyadSum(ρd, T=T) 
+# end
+# function Base.:*(L::Adjoint{Lindbladian{N}}, p::Pauli{N}) where N
+#     return L*PauliSum(p) 
+# end
 
 Base.vec(d::Dyad{N}) where N = 1 + d.ket.v + d.bra.v*(BigInt(2)^N)
 
@@ -34,6 +46,8 @@ function Base.Matrix(L::Lindbladian{N}) where N
     end
     return Lmat
 end
+
+Base.Matrix(Lprime::Adjoint{<:Any, Lindbladian}) = Matrix(L.parent)'
 
 function add_hamiltonian!(L::Lindbladian{N}, H::PauliSum{N}) where N
     sum!(L.H, H)

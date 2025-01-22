@@ -42,6 +42,9 @@ function Lindbladian(H, L, γ)
     return Lindbladian{N}(H,L,γ)
 end
 
+Base.adjoint(d::Lindbladian{N}) where N = Adjoint(d)
+Base.parent(d::Adjoint{<:Any, <:Lindbladian}) = d.parent
+
 function Base.rand(T::Type{Lindbladian{N}}; nH=2, nL=2) where N
     Λ = Lindbladian(N)
     for i in 1:nH
