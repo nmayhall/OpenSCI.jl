@@ -2,6 +2,12 @@ using PauliOperators
 using OpenSCI
 
 
+"""
+    Base.:*(Lprime::Adjoint{<:Any, Lindbladian{N}}, A) where {N}
+
+Multiplication of L' with A, which is either a PauliSum or a DyadSum.
+The adjoint here is generally used for performing Heisenberg evolution.
+"""
 function Base.:*(Lprime::Adjoint{<:Any, Lindbladian{N}}, A) where {N}
     L = Lprime.parent
     dA = 1im * (L.H*A - A*L.H)
@@ -13,6 +19,12 @@ function Base.:*(Lprime::Adjoint{<:Any, Lindbladian{N}}, A) where {N}
     end
     return dA 
 end
+
+"""
+    Base.:*(L::Lindbladian{N}, ρ) where {N}
+
+Multiplication of L with A, which is either a PauliSum or a DyadSum
+"""
 function Base.:*(L::Lindbladian{N}, ρ) where {N}
     dρ = -1im * (L.H*ρ - ρ*L.H)
     for i in 1:length(L.γ)
@@ -23,14 +35,39 @@ function Base.:*(L::Lindbladian{N}, ρ) where {N}
     end
     return dρ 
 end
-# function Base.:*(L::Lindbladian{N}, ρd::Dyad{N}, T=ComplexF64) where N
-#     return L*DyadSum(ρd, T=T) 
-# end
-# function Base.:*(L::Adjoint{Lindbladian{N}}, p::Pauli{N}) where N
-#     return L*PauliSum(p) 
-# end
 
 
+"""
+    Dyad2Pauli_rotation(N)
+
+Compute the rotation matrix to go from the Dyad (standard) basis
+to the Pauli basis.
+U(ij,k) = tr(|i><j| * Pk)
+# Arguments
+- `N::Integer`: the number of qubits
+"""
+function Dyad2Pauli_rotation(N)
+    U = zeros(ComplexF64, (4^N, 4^N))
+    for k in 0:2^N-1 
+        for b in 0:2^N-1 
+            d = Dyad(N,k,b)
+            for z in 0:2^N-1 
+                for x in 0:2^N-1 
+                    p = FixedPhasePauli(N,z,x)
+                    U[index(d), index(p)] = dot(d,p)
+                end
+            end
+        end
+    end
+end
+
+"""
+    Base.Matrix(L::Lindbladian{N}) where N
+
+Build the matrix representation of `L` in the standard (`Dyad`) basis
+# Arguments
+- `L::Lindbladian`: The Lindbladian 
+"""
 function Base.Matrix(L::Lindbladian{N}) where N
     Lmat = zeros(ComplexF64, 4^N, 4^N)
     for kr in 0:2^N-1
@@ -109,3 +146,40 @@ function add_channel_depolarizing!(L::Lindbladian{N}, γ::Vector{<:Real}) where 
     end
 end
 
+Base.exp(D::WeightDissipator{N}) where N = WeightDissipator{N}(D.l, exp(D.γ))
+Base.exp(D::SubspaceDissipator{N}) where N = SubspaceDissipator{N}(D.set, exp(D.γ))
+Base.:*(D::WeightDissipator{N}, a::Number) where N = WeightDissipator{N}(D.l, D.γ*a)
+Base.:*(D::SubspaceDissipator{N}, a::Number) where N = WeightDissipator{N}(D.set, D.γ*a)
+Base.:*(a::Number, D::WeightDissipator) = D*a 
+Base.:*(a::Number, D::SubspaceDissipator) = D*a 
+
+function pauli_weight(p::FixedPhasePauli) 
+    return count_ones(p.z | p.x)
+end
+
+
+function LinearAlgebra.Diagonal(D::WeightDissipator{N}; T=Float64) where N
+    diag = ones(T, (4^N))
+    for z in 0:2^N-1
+        for x in 0:2^N-1
+            pi = Pauli(FixedPhasePauli(z,x))
+            if pauli_weight(pi) > D.l
+                diag[index(pi)] = D.γ
+            end
+        end
+    end
+    return Diagonal(diag) 
+end
+
+function LinearAlgebra.Diagonal(D::SubspaceDissipator{N}; T=Float64) where N
+    diag = ones(T, (4^N))
+    for z in 0:2^N-1
+        for x in 0:2^N-1
+            pi = FixedPhasePauli{N}(z,x)
+            if haskey(D.set, pi) == false
+                diag[index(pi)] = D.γ
+            end
+        end
+    end
+    return Diagonal(diag) 
+end

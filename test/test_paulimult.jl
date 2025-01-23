@@ -50,7 +50,31 @@ using Plots
     display(subspace)
     println()
     display(D*subspace)
+    display(D*subspace)
+  
+
+    # err = Diagonal(D)*vec(Matrix(subspace)) - vec(Matrix(D*subspace))
+    # @test norm(err) < 1e-14
+
     return 
 end
 
-# test1()
+@testset "dot" begin
+    N = 3
+    types = [FixedPhasePauli{N}, Pauli{N}, ScaledPauli{N}, Dyad{N}, ScaledDyad{N}]
+    for T1 in types 
+        for T2 in types 
+            for i in 1:100
+                # a = rand(FixedPhasePauli{N})
+                # b = rand(Dyad{N})
+                a = rand(T1)
+                b = rand(T2)
+                err = tr(Matrix(a)*Matrix(b)) - dot(a,b)
+                if abs(err) < 1e-14
+                    println(T1, T2)
+                end
+                @test abs(err) < 1e-14
+            end
+        end
+    end
+end

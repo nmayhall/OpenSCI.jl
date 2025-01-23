@@ -8,6 +8,7 @@ include("types.jl")
 include("methods.jl")
 include("sci.jl")
 include("Hamiltonians.jl")
+include("function_dot.jl")
 
 export Lindbladian
 export SubspaceDissipator 
@@ -20,5 +21,6 @@ export add_hamiltonian!
 export add_channel_amplitude_damping! 
 export add_channel_dephasing! 
 export add_channel_depolarizing! 
+export PauliMatrix
 
 end
