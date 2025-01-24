@@ -61,16 +61,16 @@ end
 
 @testset "dot" begin
     N = 3
-    types = [FixedPhasePauli{N}, Pauli{N}, ScaledPauli{N}, Dyad{N}, ScaledDyad{N}]
+    types = [FixedPhasePauli{N}, Pauli{N}, ScaledPauli{N}, Dyad{N}, ScaledDyad{N, Float64}]
     for T1 in types 
         for T2 in types 
             for i in 1:100
                 # a = rand(FixedPhasePauli{N})
                 # b = rand(Dyad{N})
-                a = rand(T1)
-                b = rand(T2)
-                err = tr(Matrix(a)*Matrix(b)) - dot(a,b)
-                if abs(err) < 1e-14
+                a = Ket(rand(T1))
+                b = Ket(rand(T2))
+                err = tr(Matrix(a.operator)*Matrix(b.operator)) - a'*b 
+                if abs(err) > 1e-14
                     println(T1, T2)
                 end
                 @test abs(err) < 1e-14

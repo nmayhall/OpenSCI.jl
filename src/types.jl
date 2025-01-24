@@ -176,3 +176,4 @@ function todense(sdv::SparseDyadVectors{N,T}) where {N,T}
     end
     return out
 end
+
