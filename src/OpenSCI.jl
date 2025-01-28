@@ -4,7 +4,12 @@ using PauliOperators
 using LinearAlgebra
 using Printf
 
-include("types.jl")
+abstract type SuperOperator{N} end
+
+include("type_SparseDyadVectors.jl")
+include("type_Lindbladian.jl")
+include("type_WeightDissipator.jl")
+include("type_SubspaceDissipator.jl")
 include("methods.jl")
 include("sci.jl")
 include("Hamiltonians.jl")

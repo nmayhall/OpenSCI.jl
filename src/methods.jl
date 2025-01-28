@@ -53,7 +53,7 @@ function Dyad2Pauli_rotation(N)
             d = Dyad(N,k,b)
             for z in 0:2^N-1 
                 for x in 0:2^N-1 
-                    p = FixedPhasePauli(N,z,x)
+                    p = PauliBasis(N,z,x)
                     U[index(d), index(p)] = dot(d,p)
                 end
             end
@@ -153,7 +153,7 @@ Base.:*(D::SubspaceDissipator{N}, a::Number) where N = WeightDissipator{N}(D.set
 Base.:*(a::Number, D::WeightDissipator) = D*a 
 Base.:*(a::Number, D::SubspaceDissipator) = D*a 
 
-function pauli_weight(p::FixedPhasePauli) 
+function pauli_weight(p::PauliBasis) 
     return count_ones(p.z | p.x)
 end
 
@@ -162,7 +162,7 @@ function LinearAlgebra.Diagonal(D::WeightDissipator{N}; T=Float64) where N
     diag = ones(T, (4^N))
     for z in 0:2^N-1
         for x in 0:2^N-1
-            pi = Pauli(FixedPhasePauli(z,x))
+            pi = Pauli(PauliBasis(z,x))
             if pauli_weight(pi) > D.l
                 diag[index(pi)] = D.γ
             end
@@ -175,7 +175,7 @@ function LinearAlgebra.Diagonal(D::SubspaceDissipator{N}; T=Float64) where N
     diag = ones(T, (4^N))
     for z in 0:2^N-1
         for x in 0:2^N-1
-            pi = FixedPhasePauli{N}(z,x)
+            pi = PauliBasis{N}(z,x)
             if haskey(D.set, pi) == false
                 diag[index(pi)] = D.γ
             end

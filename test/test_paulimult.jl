@@ -61,11 +61,11 @@ end
 
 @testset "dot" begin
     N = 3
-    types = [FixedPhasePauli{N}, Pauli{N}, ScaledPauli{N}, Dyad{N}, ScaledDyad{N}]
+    types = [PauliBasis{N}, Pauli{N}, ScaledPauli{N}, Dyad{N}, ScaledDyad{N}]
     for T1 in types 
         for T2 in types 
             for i in 1:100
-                # a = rand(FixedPhasePauli{N})
+                # a = rand(PauliBasis{N})
                 # b = rand(Dyad{N})
                 a = rand(T1)
                 b = rand(T2)
