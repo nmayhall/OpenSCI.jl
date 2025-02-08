@@ -64,7 +64,7 @@ function Dyad2Pauli_rotation(N)
             for z in 0:2^N-1 
                 for x in 0:2^N-1 
                     p = PauliBasis(N,z,x)
-                    U[index(d), index(p)] = dot(d,p)
+                    U[index(d), index(p)] = tr(d*p)
                 end
             end
         end

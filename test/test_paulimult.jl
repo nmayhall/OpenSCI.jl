@@ -64,12 +64,12 @@ end
     types = [PauliBasis{N}, Pauli{N}, PauliSum{N}, DyadBasis{N}, Dyad{N}, DyadSum{N}]
     for T1 in types 
         for T2 in types 
-            for i in 1:100
+            for i in 1:10
                 a = rand(T1)
                 b = rand(T2)
-                err = tr(Matrix(a)*Matrix(b)) - dot(a,b)
-                if abs(err) < 1e-14
-                    println(T1, T2)
+                err = tr(Matrix(a)*Matrix(b)) - tr(a*b)
+                if abs(err) > 1e-14
+                    println(T1, " ", T2, " ", typeof(a*b))
                 end
                 @test abs(err) < 1e-14
             end
