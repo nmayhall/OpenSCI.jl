@@ -61,12 +61,10 @@ end
 
 @testset "dot" begin
     N = 3
-    types = [PauliBasis{N}, Pauli{N}, ScaledPauli{N}, Dyad{N}, ScaledDyad{N}]
+    types = [PauliBasis{N}, Pauli{N}, PauliSum{N}, DyadBasis{N}, Dyad{N}, DyadSum{N}]
     for T1 in types 
         for T2 in types 
             for i in 1:100
-                # a = rand(PauliBasis{N})
-                # b = rand(Dyad{N})
                 a = rand(T1)
                 b = rand(T2)
                 err = tr(Matrix(a)*Matrix(b)) - dot(a,b)

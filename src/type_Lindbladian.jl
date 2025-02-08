@@ -15,7 +15,7 @@ struct Lindbladian{N} <: SuperOperator{N}
 end
 
 function Lindbladian(N)
-    return Lindbladian{N}(PauliSum(N), Vector{PauliSum{N}}([]), Vector{Float64}([]))
+    return Lindbladian{N}(PauliSum(N, ComplexF64), Vector{PauliSum{N}}([]), Vector{Float64}([]))
 end
 
 function Lindbladian(H, L, γ)
@@ -35,12 +35,6 @@ function Base.rand(T::Type{Lindbladian{N}}; nH=2, nL=2) where N
     end
     for i in 1:nL
         opi = rand(Pauli{N})
-        # for j in 1:nL
-        #     opj = rand(ScaledPauli{N})
-        #     # is_diagonal(opj) == false || continue
-        #     opi += opj  
-        # end
-        # opi = opi + opi'
         push!(Λ.L,PauliSum(opi))
         push!(Λ.γ,rand())
     end
@@ -49,14 +43,14 @@ end
 
 function Base.string(Λ::Lindbladian{N}) where N
     out = "H:\n"
-    for (p,c) in Λ.H.ops
+    for (p,c) in Λ.H
         out *= @sprintf(" % 12.8f + % 12.8fi %s\n", real(c), imag(c), p)
     end
     out *= "\n"
     out *= "L:\n"
     for i in 1:length(Λ.L)
         out *= @sprintf("%4i : γ = % 12.8f + % 12.8fi\n", i, real(Λ.γ[i]), imag(Λ.γ[i]))
-        for (p,c) in Λ.L[i].ops
+        for (p,c) in Λ.L[i]
             out *= @sprintf("   % 12.8f + % 12.8fi %s\n", real(c), imag(c), p)
         end
         # out *= string(Λ.γ[i]) * " : " * string(Λ.L[i]) * "\n"

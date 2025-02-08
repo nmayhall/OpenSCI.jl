@@ -26,15 +26,25 @@ end
 Multiplication of L with A, which is either a PauliSum or a DyadSum
 """
 function Base.:*(L::Lindbladian{N}, ρ) where {N}
-    dρ = -1im * (L.H*ρ - ρ*L.H)
+    dρ = -1im * (L.H*ρ + -ρ*L.H)
     for i in 1:length(L.γ)
         Li = L.L[i]
-        dρ += L.γ[i] * (Li * ρ * Li')
+        dρ += L.γ[i] * ((Li * ρ) * Li')
         LL = Li' * Li
-        dρ -= 0.5*L.γ[i]*(LL * ρ + ρ * LL)
+        dρ += -0.5*L.γ[i]*(LL * ρ + ρ * LL)
     end
     return dρ 
 end
+# function Base.:*(L::Lindbladian{N}, ρ::DyadSum{N,T}) where {N}
+#     dρ = -1im * (L.H*ρ - ρ*L.H)
+#     for i in 1:length(L.γ)
+#         Li = L.L[i]
+#         dρ += L.γ[i] * (Li * ρ * Li')
+#         LL = Li' * Li
+#         dρ -= 0.5*L.γ[i]*(LL * ρ + ρ * LL)
+#     end
+#     return dρ 
+# end
 
 
 """

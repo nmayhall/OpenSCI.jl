@@ -25,7 +25,7 @@ Base.:*(D::SubspaceDissipator, o::Union{Pauli,PauliBasis}) = D*PauliSum(o)
 Peform D*o and overwrite o
 """
 function LinearAlgebra.lmul!(D::SubspaceDissipator, o::PauliSum)
-    for (oi,coeff) in o.ops
+    for (oi,coeff) in o
         if haskey(D.set, oi) == false
             o[oi] *= -D.γ
         end
