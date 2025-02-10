@@ -3,20 +3,9 @@ using OpenSCI
 using LinearAlgebra
 using Printf
 using Plots 
-using Dictionaries
+# using Dictionaries
 using StaticArrays
 
-
-function Base.:*(L::Linbladian{N}, v::DyadSum{N,T}) where {N,T}
-    w = -1im * (L.H*v - v*L.H)
-    
-    for i in 1:length(L.L)
-       w += L.γ[i] * (L.L[i] * (v * L.L[i]'))
-       LL = L.L[i]' * L.L[i] 
-       w -= L.γ[i]/2 * (v * LL + LL * v)
-    end
-    return w
-end
 
 function SparseDyadVectors(ds::DyadSum{N,T}, R=1) where {N,T}
     sdv = Dictionary{Dyad{N}, SizedVector{R,T}}()

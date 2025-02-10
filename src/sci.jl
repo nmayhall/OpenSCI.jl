@@ -71,7 +71,7 @@ end
 
 function build_subspace_L(L::Lindbladian{N}, v::SparseDyadVectors{N,T}) where {N,T}
    
-    indices = Dict{Dyad{N}, Int}()
+    indices = Dict{DyadBasis{N}, Int}()
     idx = 1
     for (d,c) in v
         indices[d] = idx
@@ -87,40 +87,40 @@ function build_subspace_L(L::Lindbladian{N}, v::SparseDyadVectors{N,T}) where {N
     for rdyad in keys(v)
         vi = indices[rdyad] 
 
-        for (pauli, coeff) in L.H.ops
+        for (pauli, coefficient) in L.H
             
-            ldyad = coeff * pauli * rdyad
-            if haskey(v, ldyad.dyad) 
-                Lmat[indices[ldyad.dyad], vi] += -1im * ldyad.coeff
+            ldyad = coefficient * (pauli * rdyad)
+            if haskey(v, DyadBasis(ldyad)) 
+                Lmat[indices[DyadBasis(ldyad)], vi] += -1im * coeff(ldyad)
             end
             
-            ldyad = coeff * rdyad * pauli
-            if haskey(v, ldyad.dyad) 
-                Lmat[indices[ldyad.dyad], vi] += 1im * ldyad.coeff
+            ldyad = coefficient * (rdyad * pauli)
+            if haskey(v, DyadBasis(ldyad)) 
+                Lmat[indices[DyadBasis(ldyad)], vi] += 1im * coeff(ldyad)
             end
         end
 
         
         for i in 1:length(L.γ)
             γ = L.γ[i]
-            for (pj, cj) in L.L[i].ops
-                for (pk, ck) in L.L[i].ops
+            for (pj, cj) in L.L[i]
+                for (pk, ck) in L.L[i]
                     Pj = pj * cj
                     Pk = pk * ck
 
                     ldyad = γ * (Pj * rdyad * Pk')
-                    if haskey(v, ldyad.dyad) 
-                        Lmat[indices[ldyad.dyad], vi] += ldyad.coeff
+                    if haskey(v, DyadBasis(ldyad)) 
+                        Lmat[indices[DyadBasis(ldyad)], vi] += coeff(ldyad)
                     end
                     
                     ldyad = γ * (rdyad * Pj' * Pk)
-                    if haskey(v, ldyad.dyad) 
-                        Lmat[indices[ldyad.dyad], vi] -= .5 * ldyad.coeff
+                    if haskey(v, DyadBasis(ldyad)) 
+                        Lmat[indices[DyadBasis(ldyad)], vi] -= .5 * coeff(ldyad)
                     end
                     
                     ldyad = γ * (Pj' * Pk * rdyad)
-                    if haskey(v, ldyad.dyad) 
-                        Lmat[indices[ldyad.dyad], vi] -= .5 * ldyad.coeff
+                    if haskey(v, DyadBasis(ldyad)) 
+                        Lmat[indices[DyadBasis(ldyad)], vi] -= .5 * coeff(ldyad)
                     end
                 end
             end

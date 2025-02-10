@@ -1,10 +1,10 @@
 using OrderedCollections
 
 
-SparseDyadVectors{N,T} = OrderedDict{Dyad{N}, Vector{T}} 
+SparseDyadVectors{N,T} = OrderedDict{DyadBasis{N}, Vector{T}} 
 
 function SparseDyadVectors(ds::DyadSum{N,T}) where {N,T}
-    sdv = OrderedDict{Dyad{N}, Vector{T}}()
+    sdv = OrderedDict{DyadBasis{N}, Vector{T}}()
     for (dyad,coeff) in ds
         sdv[dyad] = [coeff] 
     end
@@ -36,7 +36,7 @@ function Base.size(sdv::SparseDyadVectors)
     end
 end
 
-function Base.sum!(sdv::SparseDyadVectors{N,T}, dyad::Dyad{N}, coeffs::Vector{T}) where {N,T}
+function Base.sum!(sdv::SparseDyadVectors{N,T}, dyad::DyadBasis{N}, coeffs::Vector{T}) where {N,T}
     if haskey(sdv, dyad)
         sdv[dyad] .+= coeffs
     else
@@ -47,7 +47,7 @@ end
 function todense(sdv::SparseDyadVectors{N,T}) where {N,T}
     out = zeros(T, 4^N, size(sdv)[2])
     for (d,c) in sdv
-        out[vec(d),:] .= c
+        out[index(d),:] .= c
     end
     return out
 end

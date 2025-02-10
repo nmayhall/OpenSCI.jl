@@ -61,7 +61,7 @@ function test1()
 
     tmp1 = SparseDyadVectors{N,ComplexF64}()
     for i in 1:20
-        tmp1[rand(Dyad{N})] = [randn() + 1im*randn() for j in 1:4]
+        tmp1[rand(DyadBasis{N})] = [randn() + 1im*randn() for j in 1:4]
     end
     @test norm(Matrix(tmp1) - Matrix(fill!(tmp1,Matrix(tmp1)))) < 1e-14
 
