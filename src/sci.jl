@@ -140,3 +140,13 @@ function Base.fill!(sdv::SparseDyadVectors{N,T}, m::Matrix{T}) where {N,T}
     end
     return sdv
 end
+
+
+function sparse_lindbladian_eigensolve(L::Lindbladian, v0::SparseDyadVectors)
+    Lmat = Matrix(L)
+    l = eigvals(Lmat)
+    @printf("\n Eigenvalues of Lmat:\n")
+    for i in 1:length(l)
+        @printf(" %4i % 12.8f % 12.8fi\n", i, real(l[i]), imag(l[i]))
+    end
+end
