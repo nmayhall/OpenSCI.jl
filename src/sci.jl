@@ -13,8 +13,10 @@ function selected_ci(L::Lindbladian{N}, v::SparseDyadVectors{N,T};
         @printf(" ####################################")
         @printf(" SCI Iteration: %4i\n", n_iter)
         
+        clip!(Pv, thresh=ϵdiscard) 
         σ = multiply(L, Pv, ϵ=ϵsearch)
-        
+       
+        len1 = length(Pv)
 
         for (d,c) in σ
             if maximum(abs2.(c)) > ϵdiscard
@@ -23,6 +25,12 @@ function selected_ci(L::Lindbladian{N}, v::SparseDyadVectors{N,T};
             else
                 # sum!(QLP, d, c)
             end
+        end
+        
+        len2 = length(Pv)
+        if len1 == len2
+            @printf(" *Converged\n")
+            break
         end
 
         display(size(Pv))
@@ -39,6 +47,7 @@ function selected_ci(L::Lindbladian{N}, v::SparseDyadVectors{N,T};
         fill!(Pv, F.vectors[:,end-R+1:end])
     end
 
+    return Pv
 end
 
 
@@ -138,6 +147,11 @@ function Base.fill!(sdv::SparseDyadVectors{N,T}, m::Matrix{T}) where {N,T}
         ridx += 1
         sdv[d] .= m[ridx,:]
     end
+    return sdv
+end
+
+function PauliOperators.clip!(sdv::SparseDyadVectors; thresh=1e-5)
+    filter!(p->maximum(abs2.(p.second)) > thresh, sdv)
     return sdv
 end
 
