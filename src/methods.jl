@@ -193,3 +193,30 @@ function LinearAlgebra.Diagonal(D::SubspaceDissipator{N}; T=Float64) where N
     end
     return Diagonal(diag) 
 end
+
+function commute(p1::Union{Pauli{N},PauliBasis{N}}, p2::Union{Pauli{N},PauliBasis{N}}) where N 
+    return iseven(count_ones(p1.x & p2.z) - count_ones(p1.z & p2.x))
+end 
+
+"""
+    evolve(P::PauliSum{N,T}, G::Pauli{N}) where {N,T}
+
+Evolve `P` by Pauli `G`
+    exp(i α/2 G) P exp(-i α/2 G) = cos(α)P + isin(α)2*P*G if [P,G] ≠ 0
+    
+    exp(i ϕ G) P exp(-i ϕ G) = cos(2ϕ)P + isin(2ϕ)2*P*G if [P,G] ≠ 0
+"""
+function evolve(P::PauliSum{N,T}, G::Pauli{N}) where {N,T}
+    _cos = cos(2*coeff(G))
+    _sin = -1im*sin(2*coeff(G))
+    out = deepcopy(P) 
+    sin_branch = PauliSum(N)
+    for (p,c) in P
+        if commute(p,G) == false
+            out[p] *= _cos
+            sum!(sin_branch, c*_sin*p*PauliBasis(G))
+        end
+    end
+    sum!(out, sin_branch)
+    return out
+end
