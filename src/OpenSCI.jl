@@ -3,6 +3,7 @@ module OpenSCI
 using PauliOperators
 using LinearAlgebra
 using Printf
+using LinearMaps
 
 abstract type SuperOperator{N} end
 

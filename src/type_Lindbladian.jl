@@ -76,12 +76,12 @@ function LinearAlgebra.mul!(σ::Vector{T}, L::Lindbladian{N}, v::Vector{T}) wher
 
         # Unitary part
         for (pauli,coeff_h) in L.H
-            ldyad = -1im * coeff_h * (pauli * rdyadbasis)
+            ldyad = -1im * rcoeff * coeff_h * (pauli * rdyadbasis)
             lcoeff = coeff(ldyad)
             ldyadbasis = DyadBasis(ldyad)
             σ[index(ldyadbasis)] += lcoeff
             
-            ldyad = -1im * coeff_h * (rdyadbasis * pauli)
+            ldyad = -1im * rcoeff * coeff_h * (rdyadbasis * pauli)
             lcoeff = coeff(ldyad)
             ldyadbasis = DyadBasis(ldyad)
             σ[index(ldyadbasis)] -= lcoeff
@@ -113,23 +113,63 @@ function LinearAlgebra.mul!(σ::Vector{T}, L::Lindbladian{N}, v::Vector{T}) wher
             end
         end
     end
+    return σ
+end
 
-    # # Unitary part
-    # for (rdyad, rcoeffs) in ρ
+function LinearAlgebra.mul!(σ::Vector{T}, L::Lindbladian{N}, v, α, β) where {N,T}
+    σ .+= β*σ
+    for rdyadbasis in DyadBasis{N}
+        rcoeff = v[index(rdyadbasis)]
 
-    #     σi = -1im * (L.H * rdyad - rdyad * L.H)
-        
-    #     for i in 1:length(L.γ)
-    #         Li = L.L[i]
-    #         LL = Li' * Li
-           
-    #         σi +=  L.γ[i] * (Li * rdyad * Li')
-    #         σi -= 0.5*L.γ[i]*(LL*rdyad + rdyad*LL)
-    #     end
-        
-    #     for (ldyad,lcoeff) in σi 
-    #         sum!(σ, ldyad, lcoeff .* rcoeffs )
-    #     end
-    # end
-    # return σ 
+        # Unitary part
+        for (pauli,coeff_h) in L.H
+            ldyad = -1im * rcoeff * coeff_h * (pauli * rdyadbasis)
+            lcoeff = coeff(ldyad)
+            ldyadbasis = DyadBasis(ldyad)
+            σ[index(ldyadbasis)] += lcoeff * α
+            
+            ldyad = -1im * rcoeff * coeff_h * (rdyadbasis * pauli)
+            lcoeff = coeff(ldyad)
+            ldyadbasis = DyadBasis(ldyad)
+            σ[index(ldyadbasis)] -= lcoeff * α
+        end
+
+        # Non-unitary part
+        for i in 1:length(L.γ)
+            coeff_i = L.γ[i] 
+            for (pauli_j, coeff_j) in L.L[i]
+                for (pauli_k, coeff_k) in L.L[i]
+                    # Li v Li'
+                    ldyad = rcoeff * coeff_i * coeff_j * coeff_k' * (pauli_j * (rdyadbasis * pauli_k'))
+                    lcoeff = coeff(ldyad)
+                    ldyadbasis = DyadBasis(ldyad)
+                    σ[index(ldyadbasis)] += lcoeff * α
+                    
+                    # -1/2 Li'Li v
+                    ldyad = (-1/2) * rcoeff * coeff_i * coeff_j' * coeff_k * (pauli_j' * pauli_k * rdyadbasis)
+                    lcoeff = coeff(ldyad)
+                    ldyadbasis = DyadBasis(ldyad)
+                    σ[index(ldyadbasis)] += lcoeff * α
+                    
+                    # -1/2 v Li'Li
+                    ldyad = (-1/2) * rcoeff * coeff_i * coeff_j' * coeff_k * (rdyadbasis * pauli_j' * pauli_k)
+                    lcoeff = coeff(ldyad)
+                    ldyadbasis = DyadBasis(ldyad)
+                    σ[index(ldyadbasis)] += lcoeff * α
+                end
+            end
+        end
+    end
+    return σ
+end
+
+Base.size(L::Lindbladian{N}) where N = (4^N, 4^N)
+
+function LinearMaps.LinearMap(L::Lindbladian{N}) where N
+    scr = zeros(ComplexF64, 4^N)
+    function mymatvec(v) 
+        fill!(scr, 0)
+        return mul!(scr, L, v)
+    end
+    return LinearMap{eltype(L)}(mymatvec, 4^N, 4^N)
 end
