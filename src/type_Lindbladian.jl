@@ -71,56 +71,11 @@ Compute the action of `L*v` and store in σ.
 - `v::Vector{T}`: input vector (assumed to be coefficients in the Dyad Basis) 
 """
 function LinearAlgebra.mul!(σ::Vector{T}, L::Lindbladian{N}, v::Vector{T}) where {N,T}
-    for rdyadbasis in DyadBasis{N}
-        rcoeff = v[index(rdyadbasis)]
-
-        # Unitary part
-        for (pauli,coeff_h) in L.H
-            # @show typeof(rcoeff) typeof(coeff_h)
-            # @btime ldyad = -1im * rcoeff * coeff_h * (pauli * rdyadbasis)
-            # @show @allocated ldyad = -1im * rcoeff * coeff_h * pauli * rdyadbasis
-            ldyad = -1im * rcoeff * coeff_h * pauli * rdyadbasis
-            lcoeff = coeff(ldyad)
-            ldyadbasis = DyadBasis(ldyad)
-            σ[index(ldyadbasis)] += lcoeff
-            
-            ldyad = -1im * rcoeff * coeff_h * (rdyadbasis * pauli)
-            lcoeff = coeff(ldyad)
-            ldyadbasis = DyadBasis(ldyad)
-            σ[index(ldyadbasis)] -= lcoeff
-        end
-
-        # Non-unitary part
-        for i in 1:length(L.γ)
-            coeff_i = L.γ[i] 
-            for (pauli_j, coeff_j) in L.L[i]
-                for (pauli_k, coeff_k) in L.L[i]
-                    # Li v Li'
-                    ldyad = rcoeff * coeff_i * coeff_j * coeff_k' * (pauli_j * (rdyadbasis * pauli_k'))
-                    lcoeff = coeff(ldyad)
-                    ldyadbasis = DyadBasis(ldyad)
-                    σ[index(ldyadbasis)] += lcoeff
-                    
-                    # -1/2 Li'Li v
-                    ldyad = (-1/2) * rcoeff * coeff_i * coeff_j' * coeff_k * (pauli_j' * pauli_k * rdyadbasis)
-                    lcoeff = coeff(ldyad)
-                    ldyadbasis = DyadBasis(ldyad)
-                    σ[index(ldyadbasis)] += lcoeff
-                    
-                    # -1/2 v Li'Li
-                    ldyad = (-1/2) * rcoeff * coeff_i * coeff_j' * coeff_k * (rdyadbasis * pauli_j' * pauli_k)
-                    lcoeff = coeff(ldyad)
-                    ldyadbasis = DyadBasis(ldyad)
-                    σ[index(ldyadbasis)] += lcoeff
-                end
-            end
-        end
-    end
-    return σ
+    return mul!(σ, L, v, true, false)
 end
 
 function LinearAlgebra.mul!(σ::Vector{T}, L::Lindbladian{N}, v, α, β) where {N,T}
-    σ .+= β*σ
+    σ .+= β.*σ
     for rdyadbasis in DyadBasis{N}
         rcoeff = v[index(rdyadbasis)]
 
