@@ -8,7 +8,7 @@ D = -γ∑_{i∉set} |Qᵢ)(Qᵢ|
 D = -γQ = -γ(I-P)
 """
 struct SubspaceDissipator{N} <: SuperOperator{N}
-    set::PauliSum{N}
+    set::PauliSum{N, ComplexF64}
     γ::Float64
 end
 

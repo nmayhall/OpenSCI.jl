@@ -10,7 +10,7 @@ using LinearMaps
 
 @testset "Lindbladian mul!" begin
     Random.seed!(1234)
-    N = 4
+    N = 6
 
     L = Lindbladian(N)
     add_hamiltonian!(L, OpenSCI.heisenberg_1D(N, 1.1, 1.2, 1.3))
@@ -46,11 +46,15 @@ using LinearMaps
     @time mul!(zero(similar(v)), Lmat, v)
    
     scr = zero(similar(v))
-    @time for i in 1:1000
-        mul!(scr, L, v)
-    end
+    # @show @allocated  mul!(scr, L, v)
+    @printf(" Time Matrix mul!\n")
+    @btime mul!($scr, $Lmat, $v)
+    @printf(" Time Matrix free mul!\n")
+    @btime mul!($scr, $L, $v)
+    @printf(" Time Matrix free mul!\n")
+    @btime mul!($scr, $L, $v, true, false)
+   
     return
-    
     # e,v = eigs(L; nev=5, which=:SM, tol=1e-6)
     Base.eltype(L::Lindbladian) = ComplexF64
   
@@ -71,7 +75,7 @@ using LinearMaps
     end
     
     @printf(" Now solve with Matrix-Free mul!\n")
-    eigvals2, eigvecs2 = eigs(Lmap, nev=5, which=:SM, tol=1e-5)
+    eigvals2, eigvecs2 = eigs(LinearMap(L), nev=5, which=:SM, tol=1e-5)
    
     for i in 1:length(eigvals2)
         @printf(" %3i %12.8f %12.8fi\n", i, real(eigvals2[i]), imag(eigvals2[i]))

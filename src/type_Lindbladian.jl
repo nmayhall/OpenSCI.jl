@@ -9,8 +9,8 @@ This is general enough to realize infinitesmal evolution of any CPT map.
 `γ`: Is the vector of Jump operator coefficients (diagonal form assumed)
 """
 struct Lindbladian{N} <: SuperOperator{N}
-    H::PauliSum{N}          
-    L::Vector{PauliSum{N}}
+    H::PauliSum{N,ComplexF64}          
+    L::Vector{PauliSum{N, ComplexF64}}
     γ::Vector{Float64}
 end
 
@@ -76,7 +76,10 @@ function LinearAlgebra.mul!(σ::Vector{T}, L::Lindbladian{N}, v::Vector{T}) wher
 
         # Unitary part
         for (pauli,coeff_h) in L.H
-            ldyad = -1im * rcoeff * coeff_h * (pauli * rdyadbasis)
+            # @show typeof(rcoeff) typeof(coeff_h)
+            # @btime ldyad = -1im * rcoeff * coeff_h * (pauli * rdyadbasis)
+            # @show @allocated ldyad = -1im * rcoeff * coeff_h * pauli * rdyadbasis
+            ldyad = -1im * rcoeff * coeff_h * pauli * rdyadbasis
             lcoeff = coeff(ldyad)
             ldyadbasis = DyadBasis(ldyad)
             σ[index(ldyadbasis)] += lcoeff
@@ -146,13 +149,14 @@ function LinearAlgebra.mul!(σ::Vector{T}, L::Lindbladian{N}, v, α, β) where {
                     σ[index(ldyadbasis)] += lcoeff * α
                     
                     # -1/2 Li'Li v
-                    ldyad = (-1/2) * rcoeff * coeff_i * coeff_j' * coeff_k * (pauli_j' * pauli_k * rdyadbasis)
+                    LL = (-1/2) * rcoeff * coeff_i * coeff_j' * coeff_k * pauli_j' * pauli_k
+                    ldyad = LL * rdyadbasis
                     lcoeff = coeff(ldyad)
                     ldyadbasis = DyadBasis(ldyad)
                     σ[index(ldyadbasis)] += lcoeff * α
                     
                     # -1/2 v Li'Li
-                    ldyad = (-1/2) * rcoeff * coeff_i * coeff_j' * coeff_k * (rdyadbasis * pauli_j' * pauli_k)
+                    ldyad = rdyadbasis * LL
                     lcoeff = coeff(ldyad)
                     ldyadbasis = DyadBasis(ldyad)
                     σ[index(ldyadbasis)] += lcoeff * α
