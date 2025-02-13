@@ -1,5 +1,6 @@
 using PauliOperators
 using OpenSCI
+using Arpack
 
 function selected_ci(L::Lindbladian{N}, v::SparseDyadVectors{N,T}; 
     ϵsearch=1e-1, ϵdiscard=1e-4, max_iter_outer=4, thresh_conv=1e-5,
@@ -35,10 +36,16 @@ function selected_ci(L::Lindbladian{N}, v::SparseDyadVectors{N,T};
 
         Lmat = build_subspace_L(L, Pv)
 
-        e,v = eigen(Lmat)
-        e = e[end-R+1:end]
-        v = v[:, end-R+1:end]
-        
+        e = 0
+        v = zeros(T,size(Pv))
+        if length(Pv) < 300
+            e,v = eigen(Lmat)
+            e = e[end-R+1:end]
+            v = v[:, end-R+1:end]
+        else
+            e,v = eigs(Lmat, nev=R, v0=Matrix(Pv)[:,1], which=:LR, maxiter=500)
+        end
+
         fill!(Pv, v)
         
         if verbose > 1

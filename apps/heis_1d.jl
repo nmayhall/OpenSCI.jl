@@ -30,7 +30,7 @@ function run()
     OpenSCI.eye!(v0)
     display(v0)
     
-    v1 = selected_ci(L, v0, max_iter_outer=50, ϵsearch=1e-2, ϵdiscard=1e-4)
+    v1 = selected_ci(L, v0, max_iter_outer=4, ϵsearch=1e-3, ϵdiscard=1e-5, thresh_conv=1e-4)
 
     # Lmat = Matrix(L)
     # l = eigvals(Lmat)
