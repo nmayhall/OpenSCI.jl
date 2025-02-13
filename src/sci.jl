@@ -2,9 +2,13 @@ using PauliOperators
 using OpenSCI
 
 function selected_ci(L::Lindbladian{N}, v::SparseDyadVectors{N,T}; 
-    ϵsearch=1e-1, ϵdiscard=1e-4, max_iter_outer=4) where {N,T}
+    ϵsearch=1e-1, ϵdiscard=1e-4, max_iter_outer=4, thresh_conv=1e-5,
+    verbose = 0) where {N,T}
 
     dim, R = size(v)
+   
+    @show size(v)
+    last = deepcopy(v)
 
     Pv= deepcopy(v)
     
@@ -16,7 +20,6 @@ function selected_ci(L::Lindbladian{N}, v::SparseDyadVectors{N,T};
         clip!(Pv, thresh=ϵdiscard) 
         σ = multiply(L, Pv, ϵ=ϵsearch)
        
-        len1 = length(Pv)
 
         for (d,c) in σ
             if maximum(abs2.(c)) > ϵdiscard
@@ -27,24 +30,42 @@ function selected_ci(L::Lindbladian{N}, v::SparseDyadVectors{N,T};
             end
         end
         
-        len2 = length(Pv)
-        if len1 == len2
-            @printf(" *Converged\n")
-            break
-        end
 
         display(size(Pv))
 
         Lmat = build_subspace_L(L, Pv)
 
-        F = eigen(Lmat)
-
-        @printf("\n Eigenvalues of Lmat:\n")
-        for i in 1:length(F.values)
-            @printf(" %4i % 12.8f % 12.8fi\n", i, real(F.values[i]), imag(F.values[i]))
+        e,v = eigen(Lmat)
+        e = e[end-R+1:end]
+        v = v[:, end-R+1:end]
+        
+        fill!(Pv, v)
+        
+        if verbose > 1
+            display(Pv'*last)
         end
 
-        fill!(Pv, F.vectors[:,end-R+1:end])
+        ovlap = Pv'*last
+        
+        @printf("\n Eigenvalues of Lmat:\n")
+        for i in 1:length(e)
+            @printf(" %4i % 12.8f % 12.8fi Δ = %12.8f\n", i, real(e[i]), imag(e[i]), abs(ovlap[i,i]))
+        end
+
+
+        if length(Pv) == length(last)
+            tmp1 = Matrix(Pv)
+            tmp2 = Matrix(last)
+            ovlap = pinv(tmp1)*tmp2
+            @show det(ovlap) 
+            if abs(1 - det(ovlap)) < thresh_conv 
+                @printf(" *Converged\n")
+                break
+            end
+        end
+        
+        last = deepcopy(Pv)
+
     end
 
     return Pv
@@ -156,11 +177,11 @@ function PauliOperators.clip!(sdv::SparseDyadVectors; thresh=1e-5)
 end
 
 
-function sparse_lindbladian_eigensolve(L::Lindbladian, v0::SparseDyadVectors)
-    Lmat = Matrix(L)
-    l = eigvals(Lmat)
-    @printf("\n Eigenvalues of Lmat:\n")
-    for i in 1:length(l)
-        @printf(" %4i % 12.8f % 12.8fi\n", i, real(l[i]), imag(l[i]))
-    end
-end
+# function sparse_lindbladian_eigensolve(L::Lindbladian, v0::SparseDyadVectors)
+#     Lmat = Matrix(L)
+#     l = eigvals(Lmat)
+#     @printf("\n Eigenvalues of Lmat:\n")
+#     for i in 1:length(l)
+#         @printf(" %4i % 12.8f % 12.8fi\n", i, real(l[i]), imag(l[i]))
+#     end
+# end

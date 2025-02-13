@@ -30,5 +30,6 @@ export add_channel_dephasing!
 export add_channel_depolarizing! 
 export PauliMatrix
 export index
+export evolve
 
 end

@@ -11,7 +11,7 @@ using Arpack
 
 # @testset "tests1.jl" begin
 function run()
-    N = 5
+    N = 8
     L = Lindbladian(N)
     add_hamiltonian!(L, OpenSCI.heisenberg_1D(N, 1.1, 1.2, 1.3))
     add_channel_dephasing!(L, .1)
@@ -26,18 +26,18 @@ function run()
     v0 += DyadBasis(N, 0,1)
     v0 += DyadBasis(N, 1,0)
     
-    v0 = SparseDyadVectors(v0, R=1)
+    v0 = SparseDyadVectors(v0, R=2)
     OpenSCI.eye!(v0)
     display(v0)
     
-    v1 = selected_ci(L, v0, max_iter_outer=5, ϵsearch=1e-2, ϵdiscard=1e-3)
+    v1 = selected_ci(L, v0, max_iter_outer=50, ϵsearch=1e-2, ϵdiscard=1e-4)
 
-    Lmat = Matrix(L)
-    l = eigvals(Lmat)
-    @printf("\n Exact Eigenvalues of Lmat:\n")
-    for i in length(l)-5:length(l)
-        @printf(" %4i % 12.8f % 12.8fi\n", i, real(l[i]), imag(l[i]))
-    end
+    # Lmat = Matrix(L)
+    # l = eigvals(Lmat)
+    # @printf("\n Exact Eigenvalues of Lmat:\n")
+    # for i in length(l)-5:length(l)
+    #     @printf(" %4i % 12.8f % 12.8fi\n", i, real(l[i]), imag(l[i]))
+    # end
 
     return v1
 end

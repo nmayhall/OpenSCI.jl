@@ -202,13 +202,13 @@ end
     evolve(P::PauliSum{N,T}, G::Pauli{N}) where {N,T}
 
 Evolve `P` by Pauli `G`
-    exp(i α/2 G) P exp(-i α/2 G) = cos(α)P + isin(α)2*P*G if [P,G] ≠ 0
+    exp(i G/2) P exp(-i G/2) = cos(α)P + isin(α)2*P*G if [P,G] ≠ 0
     
-    exp(i ϕ G) P exp(-i ϕ G) = cos(2ϕ)P + isin(2ϕ)2*P*G if [P,G] ≠ 0
+where α=coeff(G)
 """
 function evolve(P::PauliSum{N,T}, G::Pauli{N}) where {N,T}
-    _cos = cos(2*coeff(G))
-    _sin = -1im*sin(2*coeff(G))
+    _cos = cos(coeff(G))
+    _sin = -1im*sin(coeff(G))
     out = deepcopy(P) 
     sin_branch = PauliSum(N)
     for (p,c) in P

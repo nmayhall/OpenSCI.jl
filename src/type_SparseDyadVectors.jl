@@ -2,6 +2,7 @@ using OrderedCollections
 
 
 SparseDyadVectors{N,T} = OrderedDict{DyadBasis{N}, Vector{T}} 
+Base.adjoint(d::SparseDyadVectors{N,T}) where {N,T} = Adjoint(d)
 
 function SparseDyadVectors(ds::DyadSum{N,T}; R=1) where {N,T}
     sdv = OrderedDict{DyadBasis{N}, Vector{T}}()
@@ -92,4 +93,14 @@ function eye!(sdv::SparseDyadVectors{N,T}) where {N,T}
     end
     Imat = Matrix(T(1)*I, size(sdv)...)
     fill!(sdv, Imat[:,1:R])
+end
+
+function Base.:*(a::Adjoint{<:Any, SparseDyadVectors{N,T}}, b::SparseDyadVectors{N,T}) where {N,T}
+    out = zeros(T,size(a.parent)[2], size(b)[2]) 
+    for (da,ca) in a.parent
+        if haskey(b,da)
+            out .+= conj(ca)*transpose(b[da])
+        end
+    end
+    return out
 end
