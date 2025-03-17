@@ -7,6 +7,7 @@ using Random
 using Plots
 using Arpack
 using LinearMaps
+using BenchmarkTools
 
 @testset "Lindbladian mul!" begin
     Random.seed!(1234)
@@ -47,17 +48,24 @@ using LinearMaps
    
     scr = zero(similar(v))
     # @show @allocated  mul!(scr, L, v)
+    # @printf(" Time Matrix mul!\n")
+    # @btime mul!($scr, $Lmat, $v)
+    # @printf(" Time Matrix free mul!\n")
+    # @btime mul!($scr, $L, $v)
+    # @printf(" Time Matrix free mul!\n")
+    # @btime mul!($scr, $L, $v, true, false)
     @printf(" Time Matrix mul!\n")
-    @btime mul!($scr, $Lmat, $v)
+    @show @allocated mul!(scr, Lmat, v)
     @printf(" Time Matrix free mul!\n")
-    @btime mul!($scr, $L, $v)
+    @show @allocated mul!(scr, L, v)
     @printf(" Time Matrix free mul!\n")
-    @btime mul!($scr, $L, $v, true, false)
+    @show @allocated mul!(scr, L, v, true, false)
    
-    return
-    # e,v = eigs(L; nev=5, which=:SM, tol=1e-6)
     Base.eltype(L::Lindbladian) = ComplexF64
   
+    e,v = eigs(L; nev=5, which=:LR, tol=1e-6)
+   
+
     scr = zeros(ComplexF64, size(v)...)
     function mymatvec(v) 
         fill!(scr, 0)
@@ -66,8 +74,12 @@ using LinearMaps
 
     Lmap = LinearMap{ComplexF64}(mymatvec, 4^N, 4^N)
 
-    @test norm(Lmat*v - Lmap*v) < 1e-12
-  
+    @show typeof(Lmat*v)
+    @show typeof(Lmap*v)
+    @test norm(Lmat*v - Matrix(Lmap*v)) < 1e-12
+ 
+    
+    return
     @printf(" Now solve with Matrix mul!\n")
     eigvals1, eigvecs1 = eigs(Lmat, nev=5, which=:SM, tol=1e-5)
     for i in 1:length(eigvals1)

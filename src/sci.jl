@@ -38,7 +38,7 @@ function selected_ci(L::Lindbladian{N}, v::SparseDyadVectors{N,T};
 
         e = 0
         v = zeros(T,size(Pv))
-        if length(Pv) < 300
+        if length(Pv) < 5000
             e,v = eigen(Lmat)
             e = e[end-R+1:end]
             v = v[:, end-R+1:end]

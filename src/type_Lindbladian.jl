@@ -70,11 +70,11 @@ Compute the action of `L*v` and store in σ.
 - `L::Lindbladian{N}`: Lindbladian SuperOperator
 - `v::Vector{T}`: input vector (assumed to be coefficients in the Dyad Basis) 
 """
-function LinearAlgebra.mul!(σ::Vector{T}, L::Lindbladian{N}, v::Vector{T}) where {N,T}
+function LinearAlgebra.mul!(σ, L::Lindbladian{N}, v) where {N}
     return mul!(σ, L, v, true, false)
 end
 
-function LinearAlgebra.mul!(σ::Vector{T}, L::Lindbladian{N}, v, α, β) where {N,T}
+function LinearAlgebra.mul!(σ, L::Lindbladian{N}, v, α, β) where {N}
     σ .+= β.*σ
     for rdyadbasis in DyadBasis{N}
         rcoeff = v[index(rdyadbasis)]
